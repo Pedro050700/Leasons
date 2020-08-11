@@ -6,6 +6,7 @@ import Avatar from '../schema/Avatar';
 import * as Yup from 'yup';
 
 import authConfig from '../middleware/config/auth';
+import { isValidObjectId } from 'mongoose';
 
 const authenticationSchema = Yup.object().shape({
   email: Yup.string()
@@ -38,9 +39,12 @@ class SessionController {
         return res.status(401).json({ error: 'Dados Inválidos' });
       }
 
-      const { _id, nome, admin, cargo } = user;
+      const { _id, nome, admin, cargo, avatar_id } = user;
 
-      const avatar = await Avatar.findOne({ _id });
+      const avatar = await Avatar.findOne({ _id: avatar_id })
+        .lean()
+        .exec();
+
       const signed = true;
 
       const token = jwt.sign({ _id }, authConfig.secret, {

@@ -20,7 +20,6 @@ routes.get('/status', (req, res) => {
 });
 
 routes.post('/usuarios', UserController.store);
-routes.put('/usuarios', UserController.update);
 
 routes.post('/sessions', SessionController.store);
 
@@ -30,6 +29,8 @@ routes.post('/avatar', upload.single('file'), AvatarController.store);
 routes.use(authMiddleware);
 
 routes.post('/cargos', CargoController.store);
+
+routes.put('/usuarios', UserController.update);
 routes.get('/usuarios', UserController.index);
 routes.get('/usuarios', UserController.list);
 routes.delete('/usuarios', UserController.delete);

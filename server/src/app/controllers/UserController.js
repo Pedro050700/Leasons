@@ -77,7 +77,9 @@ class UserControler {
     try {
       const { userId } = req;
 
-      const userExists = await User.findById(userId);
+      const userExists = await User.findById(userId)
+        .lean()
+        .exec();
 
       if (!userExists) {
         return res.json(400).json({ error: 'Usuário não encontrado' });
@@ -93,12 +95,26 @@ class UserControler {
         return res.json('Senha atualizada com sucesso');
       }
 
-      const user = await userExists
-        .update(req.body)
+      await User.updateOne({ _id: userId }, req.body)
         .lean()
         .exec();
 
-      return res.json(user);
+      const { _id, nome, email, admin, cargo, avatar_id } = await User.findById(
+        req.userId
+      )
+        .lean()
+        .exec();
+
+      return res.json({
+        user: {
+          _id,
+          nome,
+          email,
+          admin,
+          cargo,
+          avatar_id,
+        },
+      });
     } catch (err) {
       return res.status(400).json({ error: err.message });
     }

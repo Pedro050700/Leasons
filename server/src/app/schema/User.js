@@ -28,8 +28,7 @@ const useSchema = new Schema(
       default: false,
     },
     avatar_id: {
-      type: Schema.Types.ObjectId,
-      ref: 'Avatar',
+      type: String,
     },
   },
   {

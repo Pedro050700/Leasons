@@ -1,7 +1,7 @@
 import React from 'react';
 import api from '~/services/api';
 
-import { getProfile, deleteProfile } from '../../lib/localstorage';
+import { getProfile, deleteProfile, addItem } from '../../lib/localstorage';
 
 import { Header, Body, Button, PicturePreview } from './styles';
 
@@ -20,27 +20,24 @@ const FILE_SIZE = 900000;
 function Perfil() {
   const fileInputRef = React.useRef(null);
 
-  const [profile, setProfile] = React.useState({
-    nome: '',
-    senhaAntiga: null,
-    novaSenha: null,
-    confirmarSenha: null,
-    avatar_url: '',
-  });
+  const [profile, setProfile] = React.useState('');
 
   const [profilePicture, setProfilePicture] = React.useState({
     imagePreviewUrl: profilePictureDefault,
   });
 
   React.useEffect(() => {
-    const { user, session } = getProfile();
-
-    console.log(user);
+    const { user } = getProfile();
 
     setProfile({
-      ...profile,
       nome: user.nome,
-      avatar_url: user.avatar_url,
+    });
+
+    setProfilePicture({
+      imagePreviewUrl:
+        user.avatar_url == null
+          ? profilePicture.imagePreviewUrl
+          : user.avatar_url,
     });
   }, []);
 
@@ -87,16 +84,20 @@ function Perfil() {
     data.append('file', profilePicture.file);
 
     try {
-      const userAvatar = await api.post('/avatar', data, {
+      const { data: avatar } = await api.post('/avatar', data, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      const user = await api.put('/usuarios', {
+      const { data: userProfile } = await api.put('/usuarios', {
         ...profile,
-        avatar_id: userAvatar._id,
+        avatar_id: avatar._id,
       });
+
+      addItem(userProfile);
+
+      toast.success('Dados atualizados com sucesso');
     } catch (err) {
       toast.error(err.message);
     }
